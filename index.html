@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Funecap</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+
+
+    <style>
+
+        canvas{
+            width: 990px !important;
+            margin: 0 auto !important;
+        }
+
+
+        .container-middle {
+            padding: 2% 0 0 0;
+            background-color: #E9E9E9;
+            margin-top: 25px;
+            border-radius: 5px;
+        }
+
+        .lds-facebook {
+            display: inline-block;
+            position: relative;
+            width: 64px;
+            height: 64px;
+            margin-left: 45%;
+        }
+
+        .lds-facebook div {
+            display: inline-block;
+            position: absolute;
+            left: 6px;
+            width: 13px;
+            background: #D76135;
+            animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+        }
+
+        .lds-facebook div:nth-child(1) {
+            left: 6px;
+            animation-delay: -0.24s;
+        }
+
+        .lds-facebook div:nth-child(2) {
+            left: 26px;
+            animation-delay: -0.12s;
+        }
+
+        .lds-facebook div:nth-child(3) {
+            left: 45px;
+            animation-delay: 0s;
+        }
+
+        @keyframes lds-facebook {
+            0% {
+                top: 6px;
+                height: 51px;
+            }
+            50%, 100% {
+                top: 19px;
+                height: 26px;
+            }
+        }
+
+        .list_quarter_for_year li {
+            display: inline-block;
+            list-style-type: none;
+            padding: 1px;
+        }
+
+        .list_quarter_for_year ul > :first-child {
+            padding-left: 15%;
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css">
+
+</head>
+<body>
+<div style="max-height: 100%">
+
+    <div class="row align-items-center justify-content-between mb-2">
+        <div class="col-4">
+            <h1>Vue d'ensemble</h1>
+        </div>
+    </div>
+    <div class="row justify-content-between">
+        <div class="col">
+
+            <div class="charts-container">
+                <div class="row" id="chart_container">
+                    <canvas id="chart-eco"></canvas>
+                </div>
+                <div class="lds-facebook loader">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+
+                <div class="container-middle">
+                    <div class="inline_periode">
+                        <div class="row justify-content-md-center">
+                            <div class="col">
+                                <h3 class="float-right" style="margin-top: 10px;">Sur la période</h3>
+                            </div>
+                            <div class="col float-left">
+                                <div id="reportrange"
+                                     style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 55%;margin-top: 3px;border-radius: 4px;">
+                                    <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
+                                    <span></span> <b class="caret"></b>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <h3 style="text-align: center">votre centrale vous a permis de réaliser* </h3>
+                    <br>
+
+
+                    <div style="margin-left: 30%;">
+                        <div class="ui statistics centered">
+                            <div class="statistic">
+                                <div class="value value-eco">
+
+                                </div>
+                                <div class="label">
+                                    D'économies
+                                </div>
+                                <br>
+                                <small style="text-align: center;">*Les chiffres indiqués proviennent de différentes
+                                    sources
+                                </small>
+                                <small>Votre centrale ne peut être tenue pour responsable en cas d’erreur de reporting.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="no_conso_container" style="display: none;">
+            <h1>Pas de conso</h1>
+        </div>
+    </div>
+</div>
+
+
+<div class="row mt-5 ml-1 align-items-center justify-content-between">
+    <h1>Vue détaillé</h1>
+
+
+    <div class="lds-facebook loader-conso">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+
+
+</div>
+<div class="row mt-5" id="table_entry_point">
+
+</div>
+<div class="no_conso_container" style="display: none;">
+    <h1>Pas de conso</h1>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css"/>
+<link rel="stylesheet" type="text/css" href="//stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.9/semantic.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.9/semantic.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+
+
+    moment.locale('fr', {
+        months: 'janvier_février_mars_avril_mai_juin_juillet_août_septembre_octobre_novembre_décembre'.split('_'),
+        monthsShort: 'janv._févr._mars_avr._mai_juin_juil._août_sept._oct._nov._déc.'.split('_'),
+        monthsParseExact: true,
+        weekdays: 'dimanche_lundi_mardi_mercredi_jeudi_vendredi_samedi'.split('_'),
+        weekdaysShort: 'dim._lun._mar._mer._jeu._ven._sam.'.split('_'),
+        weekdaysMin: 'Di_Lu_Ma_Me_Je_Ve_Sa'.split('_'),
+        weekdaysParseExact: true,
+        longDateFormat: {
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
+            L: 'DD/MM/YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY HH:mm',
+            LLLL: 'dddd D MMMM YYYY HH:mm'
+        },
+        calendar: {
+            sameDay: '[Aujourd’hui à] LT',
+            nextDay: '[Demain à] LT',
+            nextWeek: 'dddd [à] LT',
+            lastDay: '[Hier à] LT',
+            lastWeek: 'dddd [dernier à] LT',
+            sameElse: 'L'
+        },
+        relativeTime: {
+            future: 'dans %s',
+            past: 'il y a %s',
+            s: 'quelques secondes',
+            m: 'une minute',
+            mm: '%d minutes',
+            h: 'une heure',
+            hh: '%d heures',
+            d: 'un jour',
+            dd: '%d jours',
+            M: 'un mois',
+            MM: '%d mois',
+            y: 'un an',
+            yy: '%d ans'
+        },
+        dayOfMonthOrdinalParse: /\d{1,2}(er|e)/,
+        ordinal: function (number) {
+            return number + (number === 1 ? 'er' : 'e');
+        },
+        meridiemParse: /PD|MD/,
+        isPM: function (input) {
+            return input.charAt(0) === 'M';
+        },
+        // In case the meridiem units are not separated around 12, then implement
+        // this function (look at locale/id.js for an example).
+        // meridiemHour : function (hour, meridiem) {
+        //     return /* 0-23 hour, given meridiem token and hour 1-12 */ ;
+        // },
+        meridiem: function (hours, minutes, isLower) {
+            return hours < 12 ? 'PD' : 'MD';
+        },
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 4  // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+
+
+    function getCookie(name) {
+        let cookie = {};
+        document.cookie.split(';').forEach(function (el) {
+            let [k, v] = el.split('=');
+            cookie[k.trim()] = v;
+        })
+        return cookie[name];
+    }
+
+    var start = moment().subtract(1, 'years').date(1);
+    var end = moment().subtract(1, 'months').date(1);
+
+    function cb(start, end) {
+        $('#reportrange span').html(start.format('MMMM YYYY') + ' - ' + end.format('MMMM YYYY'));
+    }
+
+
+    let cookieCCUSER = getCookie('CCIDC5');
+    let urlClientUser = "http://api.achatcentrale.fr/clientUser/" + cookieCCUSER + "/5";
+    let startPeriod = start.format('YYYY-MM-D');
+    let endPeriod = end.format('YYYY-MM-D');
+
+
+    // requete pour obtenir la donnée et afficher le graph
+    $.ajax({
+        dataType: "json",
+        url: urlClientUser,
+        success: (data) => {
+            let url = "http://api.achatcentrale.fr/consommation/" + data.CL_ID + "/" + startPeriod + "/" + endPeriod + "/5";
+            $.ajax({
+                dataType: "json",
+                url: url,
+                success: (data) => {
+
+                    $('.loader-conso').show();
+
+
+                    $("#table_entry_point").empty();
+
+
+                    if (data !== "none") {
+
+                        var sum_eco = data.graph.Total.eco;
+
+
+                        $('.loader').hide();
+                        $(".value-eco").html(Number(sum_eco).toLocaleString("fr-FR", {
+                            style: "currency",
+                            currency: "EUR"
+                        }));
+
+
+                        var dataset = [ ];
+                        let i;
+
+                        for (i = 0; i < data.graph.count; i++) {
+                            let objTpl = {
+                                label: Object.keys(data.graph[i])[0],
+                                data: Object.values(data.graph[i])[0].ECO,
+                                stack: 'Stack 0',
+                                backgroundColor: ((Object.keys(data.graph[i])[0] === "BRUNEAU") ? '#FF0000' : '#' + Math.floor((Object.values(data.graph[i])[0].id / 100) * 16775215).toString(16)),
+                                typeChart: 'CA',
+                            };
+
+                            dataset.push(objTpl);
+
+                        }
+
+                        $("#table_entry_point").append(data.table['0']);
+
+                        $('.loader-conso').hide();
+
+
+
+
+
+                        let ctx_chart_eco = document.getElementById("chart-eco").getContext('2d');
+
+                        let chart_eco = new Chart(ctx_chart_eco, {
+                            type: 'bar',
+                            data: {
+                                labels: data.graph.labels,
+                                datasets: dataset
+                            },
+                            options: {
+                                title: {
+                                    display: true,
+                                    text: 'Vos économies',
+                                },
+                                tooltips: {
+                                    enabled: true,
+                                    callbacks: {
+                                        label: function (tooltipItem, data) {
+                                            return string = tooltipItem.yLabel + "€ pour le mois de " + tooltipItem.xLabel;
+                                        }
+                                    }
+                                },
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        fontColor: "black",
+                                    },
+                                },
+                                plugins: {
+                                    datalabels: {
+                                        color: 'white',
+                                        font: {
+                                            size: "9"
+                                        },
+                                        formatter: function (value, context) {
+                                            if (value === 0) {
+                                                return '';
+                                            }
+                                            return value + ' €';
+                                        },
+                                        display: function (context) {
+                                            return context.chart.isDatasetVisible(context.datasetIndex);
+                                        }
+                                    },
+                                },
+                                responsive: true,
+                                scales: {
+                                    xAxes: [{
+                                        stacked: true,
+                                    }],
+                                    yAxes: [{
+                                        stacked: true
+                                    }]
+                                }
+                            }
+                        });
+                    } else {
+                        $('.charts-container').hide();
+
+                        $(".no_conso_container").show();
+
+
+                    }
+
+
+                }
+            });
+
+        }
+
+    });
+
+
+    // date range picker pour le graph
+    $('#reportrange').daterangepicker({
+        "locale": {
+            "format": "DD/MM/YYYY",
+            "separator": " - ",
+            "applyLabel": "Valider",
+            "cancelLabel": "Annuler",
+            "fromLabel": "De",
+            "toLabel": "à",
+            "customRangeLabel": "Période",
+            "daysOfWeek": [
+                "Dim",
+                "Lun",
+                "Mar",
+                "Mer",
+                "Jeu",
+                "Ven",
+                "Sam"
+            ],
+            "monthNames": [
+                "Janvier",
+                "Février",
+                "Mars",
+                "Avril",
+                "Mai",
+                "Juin",
+                "Juillet",
+                "Août",
+                "Septembre",
+                "Octobre",
+                "Novembre",
+                "Décembre"
+            ],
+            "firstDay": 1
+        },
+        startDate: start,
+        showCustomRangeLabel: false,
+        endDate: end,
+        ranges: {
+            'Il y a 3 mois': [moment().subtract(3, 'months').date(1), moment().date(0)],
+            'Il y a 6 mois': [moment().subtract(6, 'months').date(1), moment().date(0)],
+            'Il y a 1 an': [moment().subtract(1, 'year').date(1), moment().date(0)],
+            'Année 2017': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')],
+            'Cet année': [moment().startOf('year'), moment().date(0)],
+        }
+    }, cb);
+
+    cb(start, end);
+
+    $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
+
+
+        $('#chart_container').empty();
+        $('.loader').show();
+        $('#chart_container').append('<canvas id="chart-eco"></canvas>');
+
+        let startPeriod = picker.startDate.format('YYYY-MM-DD');
+        let endPeriod = picker.endDate.format('YYYY-MM-DD');
+
+
+        $.ajax({
+            dataType: "json",
+            url: urlClientUser,
+            success: (data) => {
+                let url = "http://api.achatcentrale.fr/consommation/" + data.CL_ID + "/" + startPeriod + "/" + endPeriod + "/5";
+                $.ajax({
+                    dataType: "json",
+                    url: url,
+                    success: (data) => {
+
+                        $('.loader-conso').show();
+
+
+                        $("#table_entry_point").empty();
+
+
+                        if (data !== "none") {
+
+                            var sum_eco = data.graph.Total.eco;
+
+
+                            $('.loader').hide();
+                            $(".value-eco").html(Number(sum_eco).toLocaleString("fr-FR", {
+                                style: "currency",
+                                currency: "EUR"
+                            }));
+
+
+                            var dataset = [ ];
+                            let i;
+
+                            for (i = 0; i < data.graph.count; i++) {
+                                let objTpl = {
+                                    label: Object.keys(data.graph[i])[0],
+                                    data: Object.values(data.graph[i])[0].ECO,
+                                    stack: 'Stack 0',
+                                    backgroundColor: ((Object.keys(data.graph[i])[0] === "BRUNEAU") ? '#FF0000' : '#' + Math.floor((Object.values(data.graph[i])[0].id / 100) * 16775215).toString(16)),
+                                    typeChart: 'CA',
+                                };
+
+                                dataset.push(objTpl);
+
+                            }
+
+                            $("#table_entry_point").append(data.table['0']);
+
+                            $('.loader-conso').hide();
+
+
+
+
+
+                            let ctx_chart_eco = document.getElementById("chart-eco").getContext('2d');
+
+                            let chart_eco = new Chart(ctx_chart_eco, {
+                                type: 'bar',
+                                data: {
+                                    labels: data.graph.labels,
+                                    datasets: dataset
+                                },
+                                options: {
+                                    title: {
+                                        display: true,
+                                        text: 'Vos économies',
+                                    },
+                                    tooltips: {
+                                        enabled: true,
+                                        callbacks: {
+                                            label: function (tooltipItem, data) {
+                                                return string = tooltipItem.yLabel + "€ pour le mois de " + tooltipItem.xLabel;
+                                            }
+                                        }
+                                    },
+                                    legend: {
+                                        position: 'right',
+                                        labels: {
+                                            fontColor: "black",
+                                        },
+                                    },
+                                    plugins: {
+                                        datalabels: {
+                                            color: 'white',
+                                            font: {
+                                                size: "9"
+                                            },
+                                            formatter: function (value, context) {
+                                                if (value === 0) {
+                                                    return '';
+                                                }
+                                                return value + ' €';
+                                            },
+                                            display: function (context) {
+                                                return context.chart.isDatasetVisible(context.datasetIndex);
+                                            }
+                                        },
+                                    },
+                                    responsive: true,
+                                    scales: {
+                                        xAxes: [{
+                                            stacked: true,
+                                        }],
+                                        yAxes: [{
+                                            stacked: true
+                                        }]
+                                    }
+                                }
+                            });
+                        } else {
+                            $('.charts-container').hide();
+
+                            $(".no_conso_container").show();
+
+
+                        }
+
+
+                    }
+                });
+
+            }
+        });
+
+
+    });
+
+
+    $('.calendar.left').hide();
+    $('.calendar.right').hide();
+    $('.ranges li:last-child').hide();
+    $('.range_inputs').hide();
+
+
+</script>
+
+<script>
+    $(document).ready(function () {
+
+
+        $('.loader-conso').hide();
+
+
+        let urlYearsConso = "http://api.achatcentrale.fr/consommation/years";
+
+        // requete pour avoir les année dispo dans les conso
+        $.ajax({
+            dataType: "json",
+            url: urlYearsConso,
+            success: (data) => {
+                let mySelect = $('#selectYearsDetail');
+                $.each(data, function (val, text) {
+
+
+                    if (val.date === moment().year()) {
+                        mySelect.append($('<option>', {value: text.date, text: text.date, id: text.date}));
+                        mySelect.attr("selected", "selected");
+                    }
+
+
+                    mySelect.append($('<option>', {value: text.date, text: text.date, id: text.date}));
+                });
+            }
+        });
+
+
+        let cookieCCUSER = getCookie('CCIDC4');
+        let urlClientUser = "http://api.achatcentrale.fr/clientUser/" + cookieCCUSER + "/5";
+        let mySelect = $('#selectYearsDetail');
+
+
+        $.ajax({
+            dataType: "json",
+            url: urlClientUser,
+            success: (data) => {
+                let urlTable = "http://api.achatcentrale.fr/consommation/years/" + data.CL_ID + "/" + moment().year();
+                $.ajax({
+                    dataType: "json",
+                    url: urlTable,
+                    success: (data) => {
+
+
+                        if (data !== "none") {
+                            $("#table_entry_point").append(data);
+                        } else {
+
+                            console.log("pas de donnée");
+
+                        }
+
+
+                    }
+
+                });
+            }
+
+        });
+
+
+        $('#selectYearsDetail').on('change', function (evt) {
+
+            $('.loader-conso').show();
+
+
+            $("#table_entry_point").empty();
+
+
+            $.ajax({
+                dataType: "json",
+                url: urlClientUser,
+                success: (data) => {
+                    let urlTable = "http://api.achatcentrale.fr/consommation/years/" + data.CL_ID + "/" + $(this).val();
+                    $.ajax({
+                        dataType: "json",
+                        url: urlTable,
+                        success: (data) => {
+                            $('.loader-conso').hide();
+
+                            $("#table_entry_point").append(data);
+
+                        }
+
+                    });
+                }
+
+            });
+
+        });
+
+
+        $('#table_conso').DataTable({
+            "paging": false,
+            "ordering": false,
+            "info": false,
+            "searching": false,
+            "responsive": true,
+            "scrollX": true
+        });
+    });
+</script>
+
+
+</body>
+</html>
